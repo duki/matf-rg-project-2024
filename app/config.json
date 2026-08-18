@@ -1,6 +1,18 @@
 {
-  "resources": {
+"resources": {
     "models": {
+      "floor": {
+        "path": "lowpoly/floorFull.obj",
+        "flip_uvs": false
+      },
+      "wall": {
+        "path": "lowpoly/wall.obj",
+        "flip_uvs": false
+      },
+      "wall_window": {
+        "path": "lowpoly/wallWindow.obj",
+        "flip_uvs": false
+      }
     }
   },
   "window": {
