@@ -2,6 +2,28 @@
 #include <engine/graphics/GraphicsController.hpp>
 #include <spdlog/spdlog.h>
 
+
+class MainPlatformEventObserver final : public engine::platform::PlatformEventObserver {
+public:
+    explicit MainPlatformEventObserver(engine::graphics::Camera *camera, bool *mouse_captured)
+        : m_camera(camera)
+        , m_mouse_captured(mouse_captured) {}
+
+
+    void on_mouse_move(engine::platform::MousePosition position) override {
+        if (*m_mouse_captured) {
+            m_camera->rotate_camera(position.dx, position.dy);
+        }
+    }
+    void on_scroll(engine::platform::MousePosition position) override {
+        m_camera->zoom(position.scroll);
+    }
+
+private:
+    engine::graphics::Camera *m_camera{nullptr};
+    bool *m_mouse_captured{nullptr};
+};
+
 class RoomController final : public engine::core::Controller {
 public:
     std::string_view name() const override {
@@ -10,9 +32,13 @@ public:
 
 protected:
     void initialize() override {
+
+
         engine::graphics::OpenGL::enable_depth_testing();
 
         auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
+        auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
+
 
         // settuj cameru na pocetku scene
         auto camera = graphics->camera();
@@ -20,7 +46,23 @@ protected:
         camera->Yaw = -90.0f;
         camera->Pitch = -12.0f;
 
+
+        // settuj kradju cursora na pocetku scene i registruj observer
+        platform->set_enable_cursor(!m_mouse_captured);
+        auto observer = std::make_unique<MainPlatformEventObserver>(camera, &m_mouse_captured);
+        platform->register_platform_event_observer(std::move(observer));
+
         spdlog::info("RoomController initialized.");
+    }
+
+    void poll_events() override {
+        auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
+
+        // f2 toggle za kradju kursora
+        if (platform->key(engine::platform::KeyId::KEY_F2).state() == engine::platform::Key::State::JustPressed) {
+            m_mouse_captured = !m_mouse_captured;
+            platform->set_enable_cursor(!m_mouse_captured);
+        }
     }
 
     void update() override {
@@ -30,24 +72,20 @@ protected:
         float dt = platform->dt();
 
 
-        // basic opcije za pomeranje u svih 6 smerova kao u elite dangerous
-        if (platform->key(engine::platform::KeyId::KEY_W).is_down()) {
-            camera->move_camera(engine::graphics::Camera::Movement::FORWARD, dt);
-        }
-        if (platform->key(engine::platform::KeyId::KEY_S).is_down()) {
-            camera->move_camera(engine::graphics::Camera::Movement::BACKWARD, dt);
-        }
-        if (platform->key(engine::platform::KeyId::KEY_A).is_down()) {
-            camera->move_camera(engine::graphics::Camera::Movement::LEFT, dt);
-        }
-        if (platform->key(engine::platform::KeyId::KEY_D).is_down()) {
-            camera->move_camera(engine::graphics::Camera::Movement::RIGHT, dt);
-        }
-        if (platform->key(engine::platform::KeyId::KEY_E).is_down()) {
-            camera->move_camera(engine::graphics::Camera::Movement::UP, dt);
-        }
-        if (platform->key(engine::platform::KeyId::KEY_Q).is_down()) {
-            camera->move_camera(engine::graphics::Camera::Movement::DOWN, dt);
+        if (m_mouse_captured) {
+            // basic kbd tasteri se koriste za kontrole pomeranja kamere
+            if (platform->key(engine::platform::KeyId::KEY_W).is_down()) {
+                camera->move_camera(engine::graphics::Camera::Movement::FORWARD, dt);
+            }
+            if (platform->key(engine::platform::KeyId::KEY_S).is_down()) {
+                camera->move_camera(engine::graphics::Camera::Movement::BACKWARD, dt);
+            }
+            if (platform->key(engine::platform::KeyId::KEY_A).is_down()) {
+                camera->move_camera(engine::graphics::Camera::Movement::LEFT, dt);
+            }
+            if (platform->key(engine::platform::KeyId::KEY_D).is_down()) {
+                camera->move_camera(engine::graphics::Camera::Movement::RIGHT, dt);
+            }
         }
     }
 
@@ -56,6 +94,9 @@ protected:
         engine::graphics::OpenGL::clear_buffers();
         platform->swap_buffers();
     }
+
+private:
+    bool m_mouse_captured{true};
 };
 
 class MainApp final : public engine::core::App {
