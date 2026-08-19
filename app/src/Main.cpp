@@ -1,9 +1,9 @@
+#include <LightSettings.hpp>
 #include <engine/core/Engine.hpp>
 #include <engine/graphics/GraphicsController.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <imgui.h>
 #include <spdlog/spdlog.h>
-
 
 class MainPlatformEventObserver final : public engine::platform::PlatformEventObserver {
 public:
@@ -110,12 +110,19 @@ protected:
         auto shader = rc->shader("starter");
         if (shader != nullptr) {
             shader->use();
-
-
+            // globalne matrice
             glm::mat4 projection = graphics->projection_matrix();
             glm::mat4 view = camera->view_matrix();
             shader->set_mat4("projection", projection);
             shader->set_mat4("view", view);
+            shader->set_vec3("viewPos", camera->Position);
+
+            // default boja je 0.0f
+            shader->set_vec3("dirLightDir", m_dir_light.direction);
+            shader->set_vec3("dirLightColor", m_dir_light.enabled ? m_dir_light.color : glm::vec3(0.0f));
+
+            shader->set_vec3("pointLightPos", m_point_light.position);
+            shader->set_vec3("pointLightColor", m_point_light.enabled ? m_point_light.color : glm::vec3(0.0f));
 
             // crtanje poda
             auto floor_model = rc->model("floor");
@@ -208,6 +215,12 @@ protected:
         desk_mat = glm::rotate(desk_mat, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         draw_model(shader, desk_model, desk_mat, glm::vec3(0.58f, 0.38f, 0.24f));
 
+        // podna lampa + izvor tackastog svetla
+        auto lamp_model = rc->model("floor_lamp");
+        glm::mat4 lamp_mat = glm::translate(glm::mat4(1.0f), glm::vec3(m_point_light.position.x, 0.07f, m_point_light.position.z));
+        glm::vec3 lamp_color = m_point_light.enabled ? glm::vec3(0.9f, 0.8f, 0.4f) : glm::vec3(0.3f, 0.3f, 0.3f);
+        draw_model(shader, lamp_model, lamp_mat, lamp_color);
+
 
         // gui
         if (m_draw_gui) {
@@ -217,6 +230,9 @@ protected:
     }
 
 private:
+    DirLightSettings m_dir_light{};
+    PointLightSettings m_point_light{};
+
     void draw_gui() {
         auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
         auto camera = graphics->camera();
@@ -253,6 +269,20 @@ private:
                     m_mouse_captured ? "yes" : "no");
 
         ImGui::SliderFloat("movespeed", &camera->MovementSpeed, 1.0f, 15.0f);
+        ImGui::Separator();
+        // Kontrole za Sunce (Directional Light)
+        if (ImGui::CollapsingHeader("Directional Light (Sun)", ImGuiTreeNodeFlags_DefaultOpen)) {
+            ImGui::Checkbox("Sun Enabled", &m_dir_light.enabled);
+            ImGui::SliderFloat3("Sun Direction", &m_dir_light.direction.x, -1.0f, 1.0f);
+            ImGui::ColorEdit3("Sun Color", &m_dir_light.color.x);
+        }
+
+        // Kontrole za Sobnu Lampu (Point Light)
+        if (ImGui::CollapsingHeader("Point Light (Floor Lamp)", ImGuiTreeNodeFlags_DefaultOpen)) {
+            ImGui::Checkbox("Lamp Enabled", &m_point_light.enabled);
+            ImGui::SliderFloat3("Lamp Position", &m_point_light.position.x, -2.0f, 2.0f);
+            ImGui::ColorEdit3("Lamp Color", &m_point_light.color.x);
+        }
         ImGui::End();
         graphics->end_gui();
     }
@@ -269,6 +299,7 @@ private:
 
     bool m_mouse_captured{true};
     bool m_draw_gui{true};
+    bool m_spotlight_attached_to_camera{true};
 };
 
 class MainApp final : public engine::core::App {

@@ -44,6 +44,10 @@
       "desk": {
         "path": "lowpoly/desk.obj",
         "flip_uvs": false
+      },
+      "floor_lamp": {
+        "path": "lowpoly/lampRoundFloor.obj",
+        "flip_uvs": false
       }
     }
   },
