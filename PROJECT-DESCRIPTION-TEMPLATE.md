@@ -1,7 +1,9 @@
 # FilmskoVece
 
 mi19325 - Dusan Mircic
-Soba u kojoj se pusta neki film. 2 razlicita tipa osvetljenja (tackasto, direkciono), gui gde se neke od vrednosti mogu podesavati, A->B splet dogadjaja
+
+Soba u kojoj se pusta neki film. 
+2 razlicita tipa osvetljenja (tackasto, direkciono), gui gde se neke od vrednosti mogu podesavati, A->B splet dogadjaja
 
 ## Controls
 
@@ -15,7 +17,9 @@ F3 -> trigger X za akciju A,B
 ### Fundamental:
 
 [x] Model with lighting
+
 [x] Two types of lighting with customizable colors and movement through GUI or ACTIONS
+
 [x] {ACTION_X} --- AFTER_M_SECONDS---Triggers---> {EVENT_A} ---> AFTER_N_SECONDS---Triggers---> {EVENT_B}
 
 ## Models:
