@@ -111,9 +111,15 @@ protected:
             shader->set_mat4("projection", projection);
             shader->set_mat4("view", view);
 
+            // crtanje poda
             auto floor_model = rc->model("floor");
-            glm::mat4 model_mat = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f));
-            draw_model(shader, floor_model, model_mat, glm::vec3(0.78f, 0.62f, 0.45f));
+            for (int x = -2; x <= 2; x++) {
+                for (int z = -2; z <= 2; z++) {
+
+                    glm::mat4 model_mat = glm::translate(glm::mat4(1.0f), glm::vec3(x * 1.0f + 0.0f, 0.0f, z * 1.0f + 0.0f));
+                    draw_model(shader, floor_model, model_mat, glm::vec3(0.78f, 0.62f, 0.45f));
+                }
+            }
         }
 
 
