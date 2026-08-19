@@ -115,7 +115,6 @@ protected:
             auto floor_model = rc->model("floor");
             for (int x = -2; x <= 2; x++) {
                 for (int z = -2; z <= 2; z++) {
-
                     glm::mat4 model_mat = glm::translate(glm::mat4(1.0f), glm::vec3(x * 1.0f + 0.0f, 0.0f, z * 1.0f + 0.0f));
                     draw_model(shader, floor_model, model_mat, glm::vec3(0.28f, 0.62f, 0.45f));
                 }
@@ -127,12 +126,30 @@ protected:
             for (int x = -2; x <= 2; x++) {
                 glm::mat4 wall_mat = glm::translate(glm::mat4(1.0f), glm::vec3(x * 1.0f, 0.0f, -2.05f));
                 if (x == 0) {
-                    // prozor
+                    // prozor na punom zidu
                     draw_model(shader, wall_window_model, wall_mat, glm::vec3(0.92f, 0.90f, 0.86f));
                 } else {
                     // pun zid
                     draw_model(shader, wall_model, wall_mat, glm::vec3(0.92f, 0.90f, 0.86f));
                 }
+            }
+            // levi bocni zid
+            for (int z = -2; z <= 2; z++) {
+                glm::mat4 wall_left = glm::translate(glm::mat4(1.0f), glm::vec3(-3.05f, 0.0f, z * 1.0f));
+                wall_left = glm::rotate(wall_left, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+                draw_model(shader, wall_model, wall_left, glm::vec3(0.85f, 0.88f, 0.90f));
+            }
+            // desni bocni zid
+            for (int z = -2; z <= 2; z++) {
+                glm::mat4 wall_right = glm::translate(glm::mat4(1.0f), glm::vec3(2.05f, 0.0f, +1.0f + z * 1.0f));
+                wall_right = glm::rotate(wall_right, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+                draw_model(shader, wall_model, wall_right, glm::vec3(0.85f, 0.88f, 0.90f));
+            }
+            // zadnja strana zida
+            for (int x = -2; x <= 2; x++) {
+                glm::mat4 wall_back = glm::translate(glm::mat4(1.0f), glm::vec3(-1.0f + x * 1.0f, 0.0f, 3.05f));
+                wall_back = glm::rotate(wall_back, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+                draw_model(shader, wall_model, wall_back, glm::vec3(0.85f, 0.88f, 0.90f));
             }
         }
 
