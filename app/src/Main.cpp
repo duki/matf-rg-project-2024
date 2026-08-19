@@ -116,7 +116,7 @@ protected:
             for (int x = -2; x <= 2; x++) {
                 for (int z = -2; z <= 2; z++) {
                     glm::mat4 model_mat = glm::translate(glm::mat4(1.0f), glm::vec3(x * 1.0f + 0.0f, 0.0f, z * 1.0f + 0.0f));
-                    draw_model(shader, floor_model, model_mat, glm::vec3(0.28f, 0.62f, 0.45f));
+                    draw_model(shader, floor_model, model_mat, glm::vec3(0.741f, 0.580f, 0.463f));
                 }
             }
             // crtanje zida
@@ -152,6 +152,18 @@ protected:
                 draw_model(shader, wall_model, wall_back, glm::vec3(0.85f, 0.88f, 0.90f));
             }
         }
+
+
+        // centralni tepih
+        auto rug_model = rc->model("rug");
+        glm::mat4 rug_mat = glm::translate(glm::mat4(1.0f), glm::vec3(0.5f, 0.055f, 0.5f));
+        rug_mat = glm::scale(rug_mat, glm::vec3(1.3f, 1.0f, 1.3f));
+        draw_model(shader, rug_model, rug_mat, glm::vec3(0.82f, 0.32f, 0.25f));
+
+        // stocic za kafu (na sredini sobe)
+        auto coffee_table = rc->model("coffee_table");
+        glm::mat4 table_mat = glm::translate(glm::mat4(1.0f), glm::vec3(-0.6f, 0.06f, 1.05f));
+        draw_model(shader, coffee_table, table_mat, glm::vec3(0.55f, 0.36f, 0.22f));
 
 
         platform->swap_buffers();
