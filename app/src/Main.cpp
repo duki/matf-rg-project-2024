@@ -162,13 +162,13 @@ protected:
 
         // centralni tepih
         auto rug_model = rc->model("rug");
-        glm::mat4 rug_mat = glm::translate(glm::mat4(1.0f), glm::vec3(0.5f, 0.055f, 0.5f));
+        glm::mat4 rug_mat = glm::translate(glm::mat4(1.0f), glm::vec3(0.5f, 0.055f, -0.5f));
         rug_mat = glm::scale(rug_mat, glm::vec3(1.3f, 1.0f, 1.3f));
         draw_model(shader, rug_model, rug_mat, glm::vec3(0.82f, 0.32f, 0.25f));
 
         // stocic za kafu (na sredini sobe)
         auto coffee_table = rc->model("coffee_table");
-        glm::mat4 table_mat = glm::translate(glm::mat4(1.0f), glm::vec3(-0.6f, 0.06f, 1.05f));
+        glm::mat4 table_mat = glm::translate(glm::mat4(1.0f), glm::vec3(-0.6f, 0.06f, -0.13f));
         draw_model(shader, coffee_table, table_mat, glm::vec3(0.55f, 0.36f, 0.22f));
 
         // tv komoda
@@ -183,11 +183,36 @@ protected:
         tv_mat = glm::rotate(tv_mat, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         draw_model(shader, tv_model, tv_mat, glm::vec3(0.12f, 0.12f, 0.12f));
 
+
+        // veliki kauc naspram tv-a
+        auto sofa_model = rc->model("sofa");
+        glm::mat4 sofa_mat = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, .9f));
+        draw_model(shader, sofa_model, sofa_mat, glm::vec3(0.25f, 0.52f, 0.7f));
+
+        // ugaona fotelja
+        auto chair_model = rc->model("lounge_chair");
+        glm::mat4 chair_mat = glm::translate(glm::mat4(1.0f), glm::vec3(0.7f, 0.0f, 0.4f));
+        chair_mat = glm::rotate(chair_mat, glm::radians(27.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        draw_model(shader, chair_model, chair_mat, glm::vec3(0.85f, 0.45f, 0.35f));
+
+        // medved
+        auto bear_model = rc->model("bear");
+        glm::mat4 bear_mat = glm::translate(glm::mat4(1.0f), glm::vec3(-1.25f, 0.87f, -1.81f));
+        bear_mat = glm::scale(bear_mat, glm::vec3(0.7f));
+        bear_mat = glm::rotate(bear_mat, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        draw_model(shader, bear_model, bear_mat, glm::vec3(0.65f, 0.42f, 0.25f));
+
+        // radni sto
+        auto desk_model = rc->model("desk");
+        glm::mat4 desk_mat = glm::translate(glm::mat4(1.0f), glm::vec3(1.8f, 0.0f, -1.0f));
+        desk_mat = glm::rotate(desk_mat, glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        draw_model(shader, desk_model, desk_mat, glm::vec3(0.58f, 0.38f, 0.24f));
+
+
         // gui
         if (m_draw_gui) {
             draw_gui();
         }
-
         platform->swap_buffers();
     }
 
@@ -195,9 +220,23 @@ private:
     void draw_gui() {
         auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
         auto camera = graphics->camera();
+        auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
+
+        float dt = platform->dt();
+        float fps = (dt > 0.0f) ? (1.0f / dt) : 0.0f;
+        float frame_time_ms = dt * 1000.0f;
+
         graphics->begin_gui();
 
+
         ImGui::Begin("devtools", &m_draw_gui);
+
+        ImGui::Text("perf");
+        ImGui::Separator();
+        ImGui::Text("fps: %.1f FPS", fps);
+        ImGui::Text("frametime: %.2f ms", frame_time_ms);
+
+        ImGui::Separator();
 
         ImGui::Text("info");
         ImGui::Separator();

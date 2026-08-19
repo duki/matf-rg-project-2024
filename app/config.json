@@ -28,6 +28,22 @@
       "tv": {
         "path": "lowpoly/televisionModern.obj",
         "flip_uvs": false
+      },
+      "sofa": {
+        "path": "lowpoly/loungeSofa.obj",
+        "flip_uvs": false
+      },
+      "lounge_chair": {
+        "path": "lowpoly/loungeChair.obj",
+        "flip_uvs": false
+      },
+      "bear": {
+        "path": "lowpoly/bear.obj",
+        "flip_uvs": false
+      },
+      "desk": {
+        "path": "lowpoly/desk.obj",
+        "flip_uvs": false
       }
     }
   },
