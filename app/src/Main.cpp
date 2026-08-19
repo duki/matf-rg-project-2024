@@ -117,7 +117,21 @@ protected:
                 for (int z = -2; z <= 2; z++) {
 
                     glm::mat4 model_mat = glm::translate(glm::mat4(1.0f), glm::vec3(x * 1.0f + 0.0f, 0.0f, z * 1.0f + 0.0f));
-                    draw_model(shader, floor_model, model_mat, glm::vec3(0.78f, 0.62f, 0.45f));
+                    draw_model(shader, floor_model, model_mat, glm::vec3(0.28f, 0.62f, 0.45f));
+                }
+            }
+            // crtanje zida
+            auto wall_model = rc->model("wall");
+            auto wall_window_model = rc->model("wall_window");
+
+            for (int x = -2; x <= 2; x++) {
+                glm::mat4 wall_mat = glm::translate(glm::mat4(1.0f), glm::vec3(x * 1.0f, 0.0f, -2.05f));
+                if (x == 0) {
+                    // prozor
+                    draw_model(shader, wall_window_model, wall_mat, glm::vec3(0.92f, 0.90f, 0.86f));
+                } else {
+                    // pun zid
+                    draw_model(shader, wall_model, wall_mat, glm::vec3(0.92f, 0.90f, 0.86f));
                 }
             }
         }
