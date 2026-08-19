@@ -71,6 +71,11 @@ protected:
         if (platform->key(engine::platform::KeyId::KEY_F1).state() == engine::platform::Key::State::JustPressed) {
             m_draw_gui = !m_draw_gui;
         }
+
+        // f3 toggle za filmski mod
+        if (platform->key(engine::platform::KeyId::KEY_F3).state() == engine::platform::Key::State::JustPressed) {
+            trigger_movie_mode();
+        }
     }
 
     void update() override {
@@ -93,6 +98,29 @@ protected:
             }
             if (platform->key(engine::platform::KeyId::KEY_D).is_down()) {
                 camera->move_camera(engine::graphics::Camera::Movement::RIGHT, dt);
+            }
+        }
+
+        if (m_movie_mode_triggered) {
+            m_event_timer += dt;
+
+            // A - ugasi tackasto svetlo, promeni direkcionog svetla boju
+            if (m_event_timer >= 1.5f && !m_event_a_done) {
+                m_event_a_done = true;
+                m_point_light.enabled = false;
+                m_dir_light.color = glm::vec3(0.08f, 0.08f, 0.15f);
+                spdlog::info("\x1b[35mlamp off\x1b[0m");
+            }
+
+            // B - upali point svetlo, namesti boju da izgleda kao da je emituje tv
+            if (m_event_timer >= 3.5f && !m_event_b_done) {
+                m_event_b_done = true;
+                m_tv_glow = 1.0f;
+
+                m_point_light.position = glm::vec3(0.0f, 0.9f, -1.6f);
+                m_point_light.color = glm::vec3(0.6f, 0.85f, 1.2f);
+                m_point_light.enabled = true;
+                spdlog::info("\x1b[36mtv on\x1b[0m");
             }
         }
     }
@@ -188,7 +216,8 @@ protected:
         auto tv_model = rc->model("tv");
         glm::mat4 tv_mat = glm::translate(glm::mat4(1.0f), glm::vec3(-0.52f, 0.32f, -1.9f));
         tv_mat = glm::rotate(tv_mat, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-        draw_model(shader, tv_model, tv_mat, glm::vec3(0.12f, 0.12f, 0.12f));
+        glm::vec3 tv_color = glm::mix(glm::vec3(0.12f, 0.12f, 0.12f), glm::vec3(0.85f, 0.95f, 1.0f), m_tv_glow);
+        draw_model(shader, tv_model, tv_mat, tv_color);
 
 
         // veliki kauc naspram tv-a
@@ -230,22 +259,18 @@ protected:
     }
 
 private:
-    DirLightSettings m_dir_light{};
-    PointLightSettings m_point_light{};
-
     void draw_gui() {
         auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
         auto camera = graphics->camera();
         auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
 
+        // fps calc
         float dt = platform->dt();
         float fps = (dt > 0.0f) ? (1.0f / dt) : 0.0f;
         float frame_time_ms = dt * 1000.0f;
 
         graphics->begin_gui();
-
-
-        ImGui::Begin("devtools", &m_draw_gui);
+        ImGui::Begin("devtools", &m_draw_gui, ImGuiWindowFlags_AlwaysAutoResize);
 
         ImGui::Text("perf");
         ImGui::Separator();
@@ -270,18 +295,39 @@ private:
 
         ImGui::SliderFloat("movespeed", &camera->MovementSpeed, 1.0f, 15.0f);
         ImGui::Separator();
-        // Kontrole za Sunce (Directional Light)
-        if (ImGui::CollapsingHeader("Directional Light (Sun)", ImGuiTreeNodeFlags_DefaultOpen)) {
-            ImGui::Checkbox("Sun Enabled", &m_dir_light.enabled);
-            ImGui::SliderFloat3("Sun Direction", &m_dir_light.direction.x, -1.0f, 1.0f);
-            ImGui::ColorEdit3("Sun Color", &m_dir_light.color.x);
+
+        // kontrole za sunce
+        if (ImGui::CollapsingHeader("directional light", ImGuiTreeNodeFlags_DefaultOpen)) {
+            ImGui::Checkbox("enable", &m_dir_light.enabled);
+            ImGui::SliderFloat3("heading", &m_dir_light.direction.x, -0.42f, 1.0f);
+            ImGui::ColorEdit3("color", &m_dir_light.color.x);
         }
 
-        // Kontrole za Sobnu Lampu (Point Light)
-        if (ImGui::CollapsingHeader("Point Light (Floor Lamp)", ImGuiTreeNodeFlags_DefaultOpen)) {
-            ImGui::Checkbox("Lamp Enabled", &m_point_light.enabled);
-            ImGui::SliderFloat3("Lamp Position", &m_point_light.position.x, -2.0f, 2.0f);
-            ImGui::ColorEdit3("Lamp Color", &m_point_light.color.x);
+        // kontrole za lampu
+        if (ImGui::CollapsingHeader("point light", ImGuiTreeNodeFlags_DefaultOpen)) {
+            ImGui::Checkbox("enable", &m_point_light.enabled);
+            ImGui::SliderFloat3("position", &m_point_light.position.x, -2.0f, 2.0f);
+            ImGui::ColorEdit3("color", &m_point_light.color.x);
+        }
+
+        if (ImGui::CollapsingHeader("movie mode", ImGuiTreeNodeFlags_DefaultOpen)) {
+            ImGui::Text("[F3] to start");
+            if (ImGui::Button("[F3]", ImVec2(150, 28))) {
+                trigger_movie_mode();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("reset mode", ImVec2(80, 28))) {
+                reset_mode();
+            }
+
+            ImGui::Separator();
+            ImGui::Text("status: %s", m_movie_mode_triggered ? "now playing: \"Chernobyl\"" : "await");
+            if (m_movie_mode_triggered) {
+                ImGui::ProgressBar(glm::clamp(m_event_timer / 3.5f, 0.0f, 1.0f));
+                ImGui::Text("timer: %.2f s", m_event_timer);
+                ImGui::Text("event A (1.5s - lights turn off): %s", m_event_a_done ? "done" : "await");
+                ImGui::Text("event B (3.5s - tv glow on): %s", m_event_b_done ? "done" : "await");
+            }
         }
         ImGui::End();
         graphics->end_gui();
@@ -296,6 +342,40 @@ private:
         shader->set_vec3("objectColor", color);
         model->draw(shader);
     }
+    void trigger_movie_mode() {
+        m_movie_mode_triggered = true;
+        m_event_timer = 0.0f;
+        m_event_a_done = false;
+        m_event_b_done = false;
+        spdlog::info("start movie mode");
+    }
+
+    void reset_mode() {
+        m_movie_mode_triggered = false;
+        m_event_timer = 0.0f;
+        m_event_a_done = false;
+        m_event_b_done = false;
+        m_tv_glow = 0.0f;
+
+        m_point_light.position = glm::vec3(1.4f, 1.4f, 0.6f);
+        m_point_light.color = glm::vec3(0.70f, 0.55f, 0.25f);
+        m_point_light.enabled = true;
+
+        m_dir_light.color = glm::vec3(0.45f, 0.40f, 0.35f);
+        spdlog::info("reset mode");
+    }
+
+
+    DirLightSettings m_dir_light{};
+    PointLightSettings m_point_light{};
+
+    // stanje tajmera za filmski mod
+    bool m_movie_mode_triggered{false};
+    float m_event_timer{0.0f};
+    bool m_event_a_done{false};
+    bool m_event_b_done{false};
+    float m_tv_glow{0.0f};
+    // kraj stanja tajmera za filmski mod
 
     bool m_mouse_captured{true};
     bool m_draw_gui{true};
