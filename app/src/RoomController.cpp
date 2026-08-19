@@ -276,14 +276,14 @@ void RoomController::draw_gui() {
     if (ImGui::CollapsingHeader("directional light", ImGuiTreeNodeFlags_DefaultOpen)) {
         ImGui::Checkbox("enable", &m_dir_light.enabled);
         ImGui::SliderFloat3("heading", &m_dir_light.direction.x, -0.42f, 1.0f);
-        ImGui::ColorEdit3("color", &m_dir_light.color.x);
+        ImGui::ColorEdit3("directional light color", &m_dir_light.color.x);
     }
 
     // kontrole za lampu
     if (ImGui::CollapsingHeader("point light", ImGuiTreeNodeFlags_DefaultOpen)) {
         ImGui::Checkbox("enable", &m_point_light.enabled);
         ImGui::SliderFloat3("position", &m_point_light.position.x, -2.0f, 2.0f);
-        ImGui::ColorEdit3("color", &m_point_light.color.x);
+        ImGui::ColorEdit3("point light color", &m_point_light.color.x);
     }
 
     if (ImGui::CollapsingHeader("movie mode", ImGuiTreeNodeFlags_DefaultOpen)) {
