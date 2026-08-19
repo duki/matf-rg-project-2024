@@ -25,3 +25,5 @@ F3 -> trigger X za akciju A,B
 ## Models:
 Svi modeli su skinuti sa strane kenney.nl i ovde deljeni u skladu sa licencom.
 
+<img width="1891" height="1018" alt="image" src="https://github.com/user-attachments/assets/863b9d11-fc82-4aa3-9946-7e3af95bfc19" />
+<img width="1869" height="986" alt="image" src="https://github.com/user-attachments/assets/318c1ac9-cd01-4fbb-a3da-9946419f27e0" />
