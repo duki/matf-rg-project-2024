@@ -12,6 +12,14 @@
       "wall_window": {
         "path": "lowpoly/wallWindow.obj",
         "flip_uvs": false
+      },
+      "rug": {
+        "path": "lowpoly/rugRectangle.obj",
+        "flip_uvs": false
+      },
+      "coffee_table": {
+        "path": "lowpoly/tableCoffee.obj",
+        "flip_uvs": false
       }
     }
   },
