@@ -20,6 +20,14 @@
       "coffee_table": {
         "path": "lowpoly/tableCoffee.obj",
         "flip_uvs": false
+      },
+      "tv_cabinet": {
+        "path": "lowpoly/cabinetTelevision.obj",
+        "flip_uvs": false
+      },
+      "tv": {
+        "path": "lowpoly/televisionModern.obj",
+        "flip_uvs": false
       }
     }
   },

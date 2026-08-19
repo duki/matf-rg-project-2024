@@ -165,6 +165,17 @@ protected:
         glm::mat4 table_mat = glm::translate(glm::mat4(1.0f), glm::vec3(-0.6f, 0.06f, 1.05f));
         draw_model(shader, coffee_table, table_mat, glm::vec3(0.55f, 0.36f, 0.22f));
 
+        // tv komoda
+        auto tv_cabinet = rc->model("tv_cabinet");
+        glm::mat4 cabinet_mat = glm::translate(glm::mat4(1.0f), glm::vec3(-0.9f, 0.0f, -1.8f));
+        cabinet_mat = glm::rotate(cabinet_mat, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        draw_model(shader, tv_cabinet, cabinet_mat, glm::vec3(0.25f, 0.22f, 0.20f));
+
+        // ekran tv-a
+        auto tv_model = rc->model("tv");
+        glm::mat4 tv_mat = glm::translate(glm::mat4(1.0f), glm::vec3(-0.52f, 0.35f, -1.8f));
+        tv_mat = glm::rotate(tv_mat, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        draw_model(shader, tv_model, tv_mat, glm::vec3(0.12f, 0.12f, 0.12f));
 
         platform->swap_buffers();
     }
