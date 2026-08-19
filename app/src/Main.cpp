@@ -1,6 +1,7 @@
 #include <engine/core/Engine.hpp>
 #include <engine/graphics/GraphicsController.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <imgui.h>
 #include <spdlog/spdlog.h>
 
 
@@ -64,6 +65,11 @@ protected:
         if (platform->key(engine::platform::KeyId::KEY_F2).state() == engine::platform::Key::State::JustPressed) {
             m_mouse_captured = !m_mouse_captured;
             platform->set_enable_cursor(!m_mouse_captured);
+        }
+
+        // f1 toggle za prikaz gui-a
+        if (platform->key(engine::platform::KeyId::KEY_F1).state() == engine::platform::Key::State::JustPressed) {
+            m_draw_gui = !m_draw_gui;
         }
     }
 
@@ -173,14 +179,45 @@ protected:
 
         // ekran tv-a
         auto tv_model = rc->model("tv");
-        glm::mat4 tv_mat = glm::translate(glm::mat4(1.0f), glm::vec3(-0.52f, 0.35f, -1.8f));
+        glm::mat4 tv_mat = glm::translate(glm::mat4(1.0f), glm::vec3(-0.52f, 0.32f, -1.9f));
         tv_mat = glm::rotate(tv_mat, glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         draw_model(shader, tv_model, tv_mat, glm::vec3(0.12f, 0.12f, 0.12f));
+
+        // gui
+        if (m_draw_gui) {
+            draw_gui();
+        }
 
         platform->swap_buffers();
     }
 
 private:
+    void draw_gui() {
+        auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
+        auto camera = graphics->camera();
+        graphics->begin_gui();
+
+        ImGui::Begin("devtools", &m_draw_gui);
+
+        ImGui::Text("info");
+        ImGui::Separator();
+
+        ImGui::Text("[x y z]: (%.2f, %.2f, %.2f)",
+                    camera->Position.x, camera->Position.y, camera->Position.z);
+        ImGui::Text("[yaw pitch]: (%.1f/%.1f)",
+                    camera->Yaw, camera->Pitch);
+        ImGui::Separator();
+        ImGui::Text("controls:");
+        ImGui::Text("press f1 to hide");
+        ImGui::Text("press f2 to capture/release mouse");
+        ImGui::Text("mouse captured: %s",
+                    m_mouse_captured ? "yes" : "no");
+
+        ImGui::SliderFloat("movespeed", &camera->MovementSpeed, 1.0f, 15.0f);
+        ImGui::End();
+        graphics->end_gui();
+    }
+
     void draw_model(const engine::resources::Shader *shader, engine::resources::Model *model, const glm::mat4 &transform, const glm::vec3 &color) {
         if (model == nullptr) {
             return;
@@ -192,6 +229,7 @@ private:
     }
 
     bool m_mouse_captured{true};
+    bool m_draw_gui{true};
 };
 
 class MainApp final : public engine::core::App {
