@@ -34,7 +34,7 @@ void RoomController::initialize() {
     camera->Yaw = -90.0f;
     camera->Pitch = -12.0f;
 
-    // settuj kradju cursora na pocetku scene i registruj observer
+    // settuj stanje kradje cursora na pocetku scene i registruj observer
     platform->set_enable_cursor(false);
     auto observer = std::make_unique<MainPlatformEventObserver>(camera);
     platform->register_platform_event_observer(std::move(observer));
@@ -50,10 +50,6 @@ void RoomController::poll_events() {
         platform->set_enable_cursor(!platform->is_cursor_enabled());
     }
 
-    // f1 toggle za prikaz gui-a
-    if (platform->key(engine::platform::KeyId::KEY_F1).state() == engine::platform::Key::State::JustPressed) {
-        m_draw_gui = !m_draw_gui;
-    }
 
     // f3 toggle za filmski mod
     if (platform->key(engine::platform::KeyId::KEY_F3).state() == engine::platform::Key::State::JustPressed) {
@@ -227,86 +223,10 @@ void RoomController::draw() {
     glm::mat4 lamp_mat = glm::translate(glm::mat4(1.0f), glm::vec3(m_point_light.position.x, 0.07f, m_point_light.position.z));
     glm::vec3 lamp_color = m_point_light.enabled ? glm::vec3(0.9f, 0.8f, 0.4f) : glm::vec3(0.3f, 0.3f, 0.3f);
     draw_model(shader, lamp_model, lamp_mat, lamp_color);
-
-    // gui
-    if (m_draw_gui) {
-        draw_gui();
-    }
-    platform->swap_buffers();
 }
-
-void RoomController::draw_gui() {
-    auto graphics = engine::core::Controller::get<engine::graphics::GraphicsController>();
-    auto camera = graphics->camera();
+void RoomController::end_draw() {
     auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
-
-    // fps calc
-    float dt = platform->dt();
-    float fps = (dt > 0.0f) ? (1.0f / dt) : 0.0f;
-    float frame_time_ms = dt * 1000.0f;
-
-    graphics->begin_gui();
-    ImGui::Begin("devtools", &m_draw_gui, ImGuiWindowFlags_AlwaysAutoResize);
-
-    ImGui::Text("perf");
-    ImGui::Separator();
-    ImGui::Text("fps: %.1f FPS", fps);
-    ImGui::Text("frametime: %.2f ms", frame_time_ms);
-
-    ImGui::Separator();
-
-    ImGui::Text("info");
-    ImGui::Separator();
-
-    ImGui::Text("[x y z]: (%.2f, %.2f, %.2f)",
-                camera->Position.x, camera->Position.y, camera->Position.z);
-    ImGui::Text("[yaw pitch]: (%.1f/%.1f)",
-                camera->Yaw, camera->Pitch);
-    ImGui::Separator();
-    ImGui::Text("controls:");
-    ImGui::Text("press f1 to hide");
-    ImGui::Text("press f2 to capture/release mouse");
-    ImGui::Text("mouse captured: %s",
-                !platform->is_cursor_enabled() ? "yes" : "no");
-
-    ImGui::SliderFloat("movespeed", &camera->MovementSpeed, 1.0f, 15.0f);
-    ImGui::Separator();
-
-    // kontrole za sunce
-    if (ImGui::CollapsingHeader("directional light", ImGuiTreeNodeFlags_DefaultOpen)) {
-        ImGui::Checkbox("enable", &m_dir_light.enabled);
-        ImGui::SliderFloat3("heading", &m_dir_light.direction.x, -0.42f, 1.0f);
-        ImGui::ColorEdit3("directional light color", &m_dir_light.color.x);
-    }
-
-    // kontrole za lampu
-    if (ImGui::CollapsingHeader("point light", ImGuiTreeNodeFlags_DefaultOpen)) {
-        ImGui::Checkbox("enable", &m_point_light.enabled);
-        ImGui::SliderFloat3("position", &m_point_light.position.x, -2.0f, 2.0f);
-        ImGui::ColorEdit3("point light color", &m_point_light.color.x);
-    }
-
-    if (ImGui::CollapsingHeader("movie mode", ImGuiTreeNodeFlags_DefaultOpen)) {
-        ImGui::Text("[F3] to start");
-        if (ImGui::Button("[F3]", ImVec2(150, 28))) {
-            trigger_movie_mode();
-        }
-        ImGui::SameLine();
-        if (ImGui::Button("reset mode", ImVec2(80, 28))) {
-            reset_mode();
-        }
-
-        ImGui::Separator();
-        ImGui::Text("status: %s", m_movie_mode_triggered ? "now playing: \"Chernobyl\"" : "await");
-        if (m_movie_mode_triggered) {
-            ImGui::ProgressBar(glm::clamp(m_event_timer / 3.5f, 0.0f, 1.0f));
-            ImGui::Text("timer: %.2f s", m_event_timer);
-            ImGui::Text("event A (1.5s - lights turn off): %s", m_event_a_done ? "done" : "await");
-            ImGui::Text("event B (3.5s - tv glow on): %s", m_event_b_done ? "done" : "await");
-        }
-    }
-    ImGui::End();
-    graphics->end_gui();
+    platform->swap_buffers();
 }
 
 void RoomController::draw_model(const engine::resources::Shader *shader, engine::resources::Model *model, const glm::mat4 &transform, const glm::vec3 &color) {

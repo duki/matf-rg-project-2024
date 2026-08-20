@@ -25,16 +25,6 @@ public:
     std::string_view name() const override {
         return "RoomController";
     }
-
-protected:
-    void initialize() override;
-    void poll_events() override;
-    void update() override;
-    void draw() override;
-
-private:
-    void draw_gui();
-    void draw_model(const engine::resources::Shader *shader, engine::resources::Model *model, const glm::mat4 &transform, const glm::vec3 &color);
     void trigger_movie_mode();
     void reset_mode();
 
@@ -49,8 +39,16 @@ private:
     float m_tv_glow{0.0f};
     // kraj stanja tajmera za filmski mod
 
-    bool m_draw_gui{true};
-    bool m_spotlight_attached_to_camera{true};
+protected:
+    void initialize() override;
+    void poll_events() override;
+    void update() override;
+    void draw() override;
+    void end_draw() override;
+
+
+private:
+    void draw_model(const engine::resources::Shader *shader, engine::resources::Model *model, const glm::mat4 &transform, const glm::vec3 &color);
 };
 
 #endif//ROOM_CONTROLLER_HPP
