@@ -133,6 +133,8 @@ public:
     */
     void _platform_on_window_close(GLFWwindow *window);
 
+    bool is_cursor_enabled() const;
+
 private:
     Key &key_ref(KeyId key);
 
@@ -153,6 +155,8 @@ private:
     void update_mouse();
 
     bool update_key(Key &key) const;
+
+    bool m_cursor_enabled{true};
 
     FrameTime m_frame_time;
     Window m_window;
