@@ -120,6 +120,11 @@ int glfw_platform_action(GLFWwindow *window, int glfw_key_code) {
  * - JustReleased -> Released if the key is released.
  * @param key The key to update.
  */
+
+bool PlatformController::is_cursor_enabled() const {
+    return m_cursor_enabled;
+}
+
 bool PlatformController::update_key(Key &key) const {
     int engine_key_code = key.id();
     int glfw_key_code = g_engine_to_glfw_key.at(engine_key_code);
@@ -228,6 +233,7 @@ void PlatformController::_platform_on_window_close(GLFWwindow *window) {
 }
 
 void PlatformController::set_enable_cursor(bool enabled) {
+    m_cursor_enabled = enabled;
     if (enabled) {
         glfwSetInputMode(m_window.handle_(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     } else {

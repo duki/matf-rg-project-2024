@@ -6,13 +6,14 @@
 #include <imgui.h>
 #include <spdlog/spdlog.h>
 
-MainPlatformEventObserver::MainPlatformEventObserver(engine::graphics::Camera *camera, bool *mouse_captured)
-    : m_camera(camera)
-    , m_mouse_captured(mouse_captured) {
+MainPlatformEventObserver::MainPlatformEventObserver(engine::graphics::Camera *camera)
+    : m_camera(camera) {
 }
 
 void MainPlatformEventObserver::on_mouse_move(engine::platform::MousePosition position) {
-    if (*m_mouse_captured) {
+    auto platform = engine::core::Controller::get<engine::platform::PlatformController>();
+
+    if (!platform->is_cursor_enabled()) {
         m_camera->rotate_camera(position.dx, position.dy);
     }
 }
@@ -34,8 +35,8 @@ void RoomController::initialize() {
     camera->Pitch = -12.0f;
 
     // settuj kradju cursora na pocetku scene i registruj observer
-    platform->set_enable_cursor(!m_mouse_captured);
-    auto observer = std::make_unique<MainPlatformEventObserver>(camera, &m_mouse_captured);
+    platform->set_enable_cursor(false);
+    auto observer = std::make_unique<MainPlatformEventObserver>(camera);
     platform->register_platform_event_observer(std::move(observer));
 
     spdlog::info("RoomController initialized.");
@@ -46,8 +47,7 @@ void RoomController::poll_events() {
 
     // f2 toggle za kradju kursora
     if (platform->key(engine::platform::KeyId::KEY_F2).state() == engine::platform::Key::State::JustPressed) {
-        m_mouse_captured = !m_mouse_captured;
-        platform->set_enable_cursor(!m_mouse_captured);
+        platform->set_enable_cursor(!platform->is_cursor_enabled());
     }
 
     // f1 toggle za prikaz gui-a
@@ -67,7 +67,7 @@ void RoomController::update() {
     auto camera = graphics->camera();
     float dt = platform->dt();
 
-    if (m_mouse_captured) {
+    if (!platform->is_cursor_enabled()) {
         // basic kbd tasteri se koriste za kontrole pomeranja kamere
         if (platform->key(engine::platform::KeyId::KEY_W).is_down()) {
             camera->move_camera(engine::graphics::Camera::Movement::FORWARD, dt);
@@ -267,7 +267,7 @@ void RoomController::draw_gui() {
     ImGui::Text("press f1 to hide");
     ImGui::Text("press f2 to capture/release mouse");
     ImGui::Text("mouse captured: %s",
-                m_mouse_captured ? "yes" : "no");
+                !platform->is_cursor_enabled() ? "yes" : "no");
 
     ImGui::SliderFloat("movespeed", &camera->MovementSpeed, 1.0f, 15.0f);
     ImGui::Separator();

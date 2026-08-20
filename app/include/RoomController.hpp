@@ -11,14 +11,13 @@
 
 class MainPlatformEventObserver final : public engine::platform::PlatformEventObserver {
 public:
-    explicit MainPlatformEventObserver(engine::graphics::Camera *camera, bool *mouse_captured);
+    explicit MainPlatformEventObserver(engine::graphics::Camera *camera);
 
     void on_mouse_move(engine::platform::MousePosition position) override;
     void on_scroll(engine::platform::MousePosition position) override;
 
 private:
     engine::graphics::Camera *m_camera{nullptr};
-    bool *m_mouse_captured{nullptr};
 };
 
 class RoomController final : public engine::core::Controller {
@@ -50,7 +49,6 @@ private:
     float m_tv_glow{0.0f};
     // kraj stanja tajmera za filmski mod
 
-    bool m_mouse_captured{true};
     bool m_draw_gui{true};
     bool m_spotlight_attached_to_camera{true};
 };
